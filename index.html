@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3B Detikan - RCDigitalShop</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* Copy semua style CSS dari kode sebelumnya */
+* { box-sizing:border-box; margin:0; padding:0; font-family:'Roboto',sans-serif; }
+body { min-height:100vh; display:flex; justify-content:center; align-items:center; background: linear-gradient(135deg,#0f2027,#203a43,#2c5364); color:#fff; overflow-x:hidden; }
+.glass { background: rgba(255,255,255,0.06); border-radius: 25px; padding: 35px; backdrop-filter: blur(25px) saturate(180%); border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 8px 40px rgba(0,0,0,0.6); transition: all 0.4s ease; }
+#loginBox { text-align:center; width:100%; max-width:400px; }
+#loginBox h2 { font-size:32px; color:#00c6ff; margin-bottom:20px; text-shadow:0 0 6px #00c6ff; }
+#loginBox input { width:100%; padding:14px; border-radius:12px; border:1px solid rgba(255,255,255,0.3); margin-bottom:15px; text-align:center; font-size:16px; background: rgba(255,255,255,0.08); color:#fff; box-shadow: inset 0 0 12px rgba(0,0,0,0.2); transition: 0.3s; }
+#loginBox input:focus { background: rgba(255,255,255,0.12); outline:none; }
+#loginBox input::placeholder { color:#ccc; }
+#loginBox button { width:100%; padding:15px; border:none; border-radius:12px; background: linear-gradient(90deg,#00c6ff,#0072ff); color:#fff; font-weight:bold; cursor:pointer; font-size:16px; box-shadow: 0 0 6px #00c6ff; transition:0.3s; }
+#loginBox button:hover { opacity:0.85; transform: scale(1.02); }
+#main { display:none; }
+#main h1 { text-align:center; font-size:32px; color:#00c6ff; margin-bottom:5px; text-shadow:0 0 6px #00c6ff; }
+.subtitle { text-align:center; font-size:14px; color:#aaa; margin-bottom:25px; letter-spacing:1px; }
+textarea { width:100%; min-height:130px; border:none; border-radius:12px; border:1px solid rgba(255,255,255,0.3); padding:14px; font-size:15px; margin-bottom:20px; background: rgba(255,255,255,0.08); color:#fff; resize:none; box-shadow: inset 0 0 12px rgba(0,0,0,0.2); transition:0.3s; }
+textarea:focus { background: rgba(255,255,255,0.12); }
+button { width:100%; padding:14px; border:none; border-radius:12px; font-weight:bold; font-size:16px; cursor:pointer; margin-bottom:12px; transition:0.3s; }
+button.start { background: linear-gradient(90deg,#00c6ff,#0072ff); color:#fff; box-shadow:0 0 6px #00c6ff;}
+button.start:hover { transform: scale(1.02); opacity:0.85; }
+button.clear { background:#222; color:#fff; box-shadow:0 0 6px rgba(0,192,255,0.3);}
+button.clear:hover { transform: scale(1.02); opacity:0.85; }
+.counters { display:flex; justify-content:space-between; margin:20px 0; flex-wrap:wrap; gap:10px; }
+.counter-box { flex:1; background: rgba(255,255,255,0.05); padding:20px; border-radius:12px; text-align:center; box-shadow:0 4px 20px rgba(0,0,0,0.4); border:1px solid rgba(0,255,255,0.2); transition:0.3s; }
+.counter-box h3 { font-size:16px; color:#fff; margin-bottom:6px; }
+.counter-box span { font-size:24px; font-weight:bold; color:#00ff88; }
+.history { background: rgba(0,0,0,0.2); padding:15px; border-radius:12px; max-height:220px; overflow-y:auto; font-size:13px; box-shadow: inset 0 0 15px rgba(255,255,255,0.05); }
+.success { color:#00ff88; }
+.failed { color:#ff4d4d; }
+.history div { animation: fadeIn 0.5s ease forwards; }
+.history::-webkit-scrollbar { width:6px; }
+.history::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius:10px; }
+.history::-webkit-scrollbar-thumb { background:#00c6ff; border-radius:10px; }
+.footer { text-align:center; margin-top:20px; font-size:12px; color:#aaa; letter-spacing:1px; }
+@keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
+@media(max-width:480px){ textarea { min-height:100px; } .counter-box span { font-size:22px; } }
+</style>
+</head>
+<body>
+
+<div id="loginBox" class="glass">
+  <h2>Source Access</h2>
+  <input type="text" id="userId" placeholder="Masukan ID">
+  <input type="password" id="pinInput" placeholder="Masukan PIN">
+  <button onclick="login()">Masuk</button>
+</div>
+
+<div id="main" class="glass">
+  <h1>3B INSTAN SUBMIT</h1>
+  <div class="subtitle">add_roamer 90day</div>
+
+  <textarea id="imei" placeholder="Masukkan IMEI (1 baris 1 IMEI)"></textarea>
+  <button class="start" onclick="startProcess()">START PROCESS</button>
+  <button class="clear" onclick="clearHistory()">CLEAR HISTORY</button>
+
+  <div class="counters">
+    <div class="counter-box">
+      <h3>Total Sukses</h3>
+      <span id="successCount">0</span>
+    </div>
+    <div class="counter-box">
+      <h3>Total Gagal</h3>
+      <span id="failCount">0</span>
+    </div>
+  </div>
+
+  <div class="history" id="history"></div>
+  <div class="footer">Powered by rcdigitalshop</div>
+</div>
+
+<script>
+let successCount = Number(localStorage.getItem("successCount")) || 0;
+let failCount = Number(localStorage.getItem("failCount")) || 0;
+document.getElementById("successCount").innerText = successCount;
+document.getElementById("failCount").innerText = failCount;
+document.getElementById("history").innerHTML = localStorage.getItem("historyData") || "";
+
+function login(){
+  const id = document.getElementById("userId").value.trim();
+  const pin = document.getElementById("pinInput").value.trim();
+  fetch("https://YOUR_RENDER_URL/api/login", {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({id, pin})
+  })
+  .then(r=>r.json())
+  .then(res=>{
+    if(res.success){
+      document.getElementById("loginBox").style.display="none";
+      document.getElementById("main").style.display="block";
+    }else{
+      alert("ID atau PIN salah!");
+    }
+  });
+}
+
+async function startProcess(){
+  let list = document.getElementById("imei").value.trim().split("\n").filter(x=>x);
+  for(let i=0;i<list.length;i++){
+    await sendRequest(list[i]);
+    await new Promise(r=>setTimeout(r,3000));
+  }
+}
+
+async function sendRequest(imei){
+  try{
+    let res = await fetch("https://YOUR_RENDER_URL/api/process-imei",{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({imeis:[imei]})
+    });
+    let data = await res.json();
+    let result = data[0];
+    if(result.response.toLowerCase().includes("success")){
+      successCount++;
+      addHistory(imei,"SUCCESS",result.response,true);
+    } else {
+      failCount++;
+      addHistory(imei,"FAILED",result.response,false);
+    }
+    document.getElementById("successCount").innerText = successCount;
+    document.getElementById("failCount").innerText = failCount;
+    localStorage.setItem("successCount",successCount);
+    localStorage.setItem("failCount",failCount);
+  } catch(err){
+    failCount++;
+    document.getElementById("failCount").innerText = failCount;
+    addHistory(imei,"ERROR",err,false);
+  }
+}
+
+function addHistory(imei,status,response,isSuccess){
+  let box = document.getElementById("history");
+  let div = document.createElement("div");
+  div.className = isSuccess ? "success" : "failed";
+  div.innerHTML = `<b>${imei}</b> - ${status}<br><small>${response}</small><hr>`;
+  box.prepend(div);
+  localStorage.setItem("historyData",box.innerHTML);
+}
+
+function clearHistory(){
+  localStorage.removeItem("historyData");
+  localStorage.removeItem("successCount");
+  localStorage.removeItem("failCount");
+  location.reload();
+}
+</script>
+</body>
+</html>
